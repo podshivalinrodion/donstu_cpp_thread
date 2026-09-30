@@ -14,6 +14,13 @@ std::mutex    logMutex;
 // shared counter — атомарный (задание 20)
 std::atomic<int> counter{0};
 
+// --- Задание 21: производитель-потребитель ---
+std::mutex              pcMutex;
+std::condition_variable pcCv;
+int                     sharedValue = 0;
+bool                    ready = false;
+bool                    done  = false;
+
 bool writeLine(const std::string& msg) {
   std::lock_guard<std::mutex> lock(logMutex);
   logFile << msg;
@@ -30,7 +37,6 @@ void about() {
 }
 
 void funcThread(const ThreadArgs& args) {
-  // каждый поток накручивает счётчик 100000 раз
   for (int i = 0; i < 100000; ++i) {
     ++counter;
   }
@@ -69,9 +75,52 @@ void funcThreadWithResult(const ThreadArgs& args,
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
-  // возвращаем результат через promise
   std::ostringstream result;
   result << "thread " << args.tag
          << " finished " << COUNT_ITERATIONS << " iterations";
   prom.set_value(result.str());
+}
+
+void producerThread() {
+  for (int i = 0; i < 10; ++i) {
+    std::unique_lock<std::mutex> lock(pcMutex);
+
+    // ждать, пока потребитель не заберёт предыдущее значение
+    pcCv.wait(lock, [] { return !ready; });
+
+    sharedValue = i;
+    ready = true;
+
+    lock.unlock();
+    pcCv.notify_one();
+  }
+
+  // конец: сообщаем потребителю, что больше данных не будет
+  {
+    std::lock_guard<std::mutex> lock(pcMutex);
+    done = true;
+  }
+  pcCv.notify_one();
+}
+
+void consumerThread() {
+  while (true) {
+    std::unique_lock<std::mutex> lock(pcMutex);
+
+    // ждать, пока данные готовы ИЛИ производитель закончил
+    pcCv.wait(lock, [] { return ready || done; });
+
+    // если производитель закончил и данных нет — выходим
+    if (done && !ready) break;
+
+    int value = sharedValue;
+    ready = false;
+
+    lock.unlock();
+    pcCv.notify_one();
+
+    std::ostringstream oss;
+    oss << "consumer: got value = " << value << "\n";
+    writeLine(oss.str());
+  }
 }

@@ -62,10 +62,19 @@ int main() {
                       std::cref(extraArgs),
                       std::move(prom));
 
-  std::string result = fut.get();   // ждёт и забирает результат
+  std::string result = fut.get();
   tResult.join();
 
   std::cout << "main: got from thread: " << result << "\n";
+
+  // Задание 21: производитель-потребитель
+  std::thread producer(producerThread);
+  std::thread consumer(consumerThread);
+
+  producer.join();
+  consumer.join();
+
+  std::cout << "main: producer-consumer finished\n";
 
   if (!writeLine("main: all threads finished\n")) {
     std::cerr << "main: failed to write final line\n";
