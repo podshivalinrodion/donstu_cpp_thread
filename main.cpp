@@ -7,8 +7,12 @@
 int main() {
   about();
 
-  // Open log file
-  Logger logger("output.log");
+  // open global log file — defined in threadfuncs.cpp
+  logFile.open("output.log", std::ios::out | std::ios::trunc);
+  if (!logFile.is_open()) {
+    std::cerr << "main: cannot open output.log\n";
+    return 1;
+  }
 
   std::cout << "main: pid = " << getThreadID()
             << ", opened file: 'output.log'\n";
@@ -21,20 +25,19 @@ int main() {
     {4, "Fourth"},
   };
 
-  // thread are starting
+  // threads are starting
   std::vector<std::thread> threads;
   threads.reserve(COUNT_THREADS);
 
   for (int i = 0; i < COUNT_THREADS; ++i) {
-    threads.emplace_back(funcThread, std::cref(args[i]), std::ref(logger));
+    threads.emplace_back(funcThread, std::cref(args[i]));
   }
 
-  // wait for stop all threads
+  // wait for all threads to finish
   for (auto& t : threads) {
     if (t.joinable()) t.join();
   }
 
-  // close file automatically
-  std::cout << "main: all threads finished, file closed\n";
+  std::cout << "main: all threads finished\n";
   return 0;
 }

@@ -1,12 +1,13 @@
 #pragma once
 
+#include <sys/types.h>
 #include <string>
 #include <mutex>
 #include <fstream>
 
 // count of threads and iterations
-constexpr int COUNT_THREADS    = 4;
-constexpr int COUNT_ITERATIONS = 3;
+inline constexpr int COUNT_THREADS    = 4;
+inline constexpr int COUNT_ITERATIONS = 3;
 
 // args for thread
 struct ThreadArgs {
@@ -14,29 +15,18 @@ struct ThreadArgs {
   std::string tag;
 };
 
-// common resources in separate class
-class Logger {
-public:
-  explicit Logger(const std::string& filename);
-  ~Logger();
+// global log file and mutex protecting it
+extern std::ofstream logFile;
+extern std::mutex    logMutex;
 
-  // write line with mutex
-  void writeLine(const std::string& msg);
-
-  // block copy and move
-  Logger(const Logger&)            = delete;
-  Logger& operator=(const Logger&) = delete;
-
-private:
-  std::ofstream    file_;
-  std::mutex       mutex_;
-};
+// write line to log (thread-safe)
+void writeLine(const std::string& msg);
 
 // function for thread
-void funcThread(const ThreadArgs& args, Logger& logger);
+void funcThread(const ThreadArgs& args);
 
 // get system TID for current linux thread
 pid_t getThreadID();
 
-// healline of software
+// headline of software
 void about();
