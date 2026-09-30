@@ -8,7 +8,6 @@
 int main() {
   about();
 
-  // open global log file — defined in threadfuncs.cpp
   logFile.open("output.log", std::ios::out | std::ios::trunc);
   if (!logFile.is_open()) {
     std::cerr << "main: cannot open output.log\n";
@@ -24,7 +23,6 @@ int main() {
     }
   }
 
-  // args for threads
   std::vector<ThreadArgs> args(COUNT_THREADS);
   for (int i = 0; i < COUNT_THREADS; ++i) {
     std::ostringstream oss;
@@ -33,7 +31,6 @@ int main() {
     args[i].tag = oss.str();
   }
 
-  // threads are starting
   std::vector<std::thread> threads;
   threads.reserve(COUNT_THREADS);
 
@@ -41,10 +38,12 @@ int main() {
     threads.emplace_back(funcThread, std::cref(args[i]));
   }
 
-  // wait for all threads to finish
   for (auto& t : threads) {
     if (t.joinable()) t.join();
   }
+
+  std::cout << "counter = " << counter
+            << " (expected " << COUNT_THREADS * 100000 << ")\n";
 
   if (!writeLine("main: all threads finished\n")) {
     std::cerr << "main: failed to write final line\n";

@@ -7,9 +7,10 @@
 #include <chrono>
 #include <thread>
 
-// global log file and mutex — определены ровно один раз
 std::ofstream logFile;
 std::mutex    logMutex;
+
+std::atomic<int> counter{0};
 
 bool writeLine(const std::string& msg) {
   std::lock_guard<std::mutex> lock(logMutex);
@@ -27,6 +28,10 @@ void about() {
 }
 
 void funcThread(const ThreadArgs& args) {
+  for (int i = 0; i < 100000; ++i) {
+    ++counter;
+  }
+
   for (int i = 0; i < COUNT_ITERATIONS; ++i) {
     std::ostringstream oss;
 

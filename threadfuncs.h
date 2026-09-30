@@ -4,6 +4,7 @@
 #include <string>
 #include <mutex>
 #include <fstream>
+#include <atomic>
 
 // count of threads and iterations
 inline constexpr int COUNT_THREADS    = 4;
@@ -18,6 +19,9 @@ struct ThreadArgs {
 // global log file and mutex protecting it
 extern std::ofstream logFile;
 extern std::mutex    logMutex;
+
+// shared counter — experiment 1: ordinary int (race-prone)
+extern std::atomic<int> counter;
 
 // write line to log (thread-safe)
 bool writeLine(const std::string& msg);
