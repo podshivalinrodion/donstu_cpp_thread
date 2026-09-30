@@ -40,25 +40,12 @@ int main() {
   for (int i = 0; i < COUNT_THREADS; ++i) {
     threads.emplace_back(funcThread, std::cref(args[i]));
   }
-	
-	  // Задание 24: сравнение std::thread::id через ==
-//  std::thread::id mainId = std::this_thread::get_id();
-//  std::thread::id t0Id   = threads[0].get_id();
-//  std::thread::id t1Id   = threads[1].get_id();
-//
-  //std::cout << "main thread id == main thread id: "
-   //         << (mainId == mainId) << "\n";
- // std::cout << "main thread id == t0 id:        "
-     //       << (mainId == t0Id) << "\n";
- // std::cout << "t0 id == t1 id:                  "
-       //     << (t0Id == t1Id) << "\n";
-  // wait for all threads to finish
+
   // wait for all threads to finish
   for (auto& t : threads) {
-    if (t.joinable()) {
-       t.join();   // ← ВРЕМЕННО закомментировано для задания 9
-    }
+    if (t.joinable()) t.join();
   }
+
   if (!writeLine("main: all threads finished\n")) {
     std::cerr << "main: failed to write final line\n";
   }

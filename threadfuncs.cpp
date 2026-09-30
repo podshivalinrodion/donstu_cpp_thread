@@ -34,7 +34,7 @@ void funcThread(const ThreadArgs& args) {
         << "] pid = "  << ::getpid()
         << " ppid = "  << ::getppid()
         << " tid = "   << getThreadID()
-	<< " std_id = " << std::this_thread::get_id()
+        << " std_id = " << std::this_thread::get_id()
         << " iter = "  << i
         << "\n";
 
