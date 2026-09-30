@@ -11,10 +11,11 @@
 std::ofstream logFile;
 std::mutex    logMutex;
 
-void writeLine(const std::string& msg) {
+bool writeLine(const std::string& msg) {
   std::lock_guard<std::mutex> lock(logMutex);
   logFile << msg;
   logFile.flush();
+  return static_cast<bool>(logFile);
 }
 
 pid_t getThreadID() {
@@ -33,6 +34,7 @@ void funcThread(const ThreadArgs& args) {
         << "] pid = "  << ::getpid()
         << " ppid = "  << ::getppid()
         << " tid = "   << getThreadID()
+	<< " std_id = " << std::this_thread::get_id()
         << " iter = "  << i
         << "\n";
 

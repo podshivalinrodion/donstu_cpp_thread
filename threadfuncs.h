@@ -20,7 +20,7 @@ extern std::ofstream logFile;
 extern std::mutex    logMutex;
 
 // write line to log (thread-safe)
-void writeLine(const std::string& msg);
+bool writeLine(const std::string& msg);
 
 // function for thread
 void funcThread(const ThreadArgs& args);
